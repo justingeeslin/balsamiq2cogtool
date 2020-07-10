@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import org.sqlite.JDBC;
+import org.json.*;
 
 public class App
 {
@@ -27,8 +28,6 @@ public class App
 			Class.forName("org.sqlite.JDBC");
 			db = DriverManager.getConnection("jdbc:sqlite:TypeTesting.bmpr"); 
 			System.out.println("Opened a sql file..");
-					
-			db.close();
 		
 		} catch (ClassNotFoundException e) {
 	
@@ -49,6 +48,13 @@ public class App
 		}
 
 		parseBalsamiqFile();
+
+		try {
+			db.close();
+		}
+		catch(Exception e) {
+
+		}
     }
 
 	private static void parseBalsamiqFile(){
@@ -73,6 +79,45 @@ public class App
 		
 		outputXML.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		outputXML.println("<cogtoolimport version=\"1\">");
+
+		// Get all the alternative version / branches and import them as various designs in CogTool
+		try {
+			final Statement stmt = db.createStatement();
+			final ResultSet branches = stmt.executeQuery("SELECT * FROM Branches;");
+			final ResultSetMetaData rsmd = branches.getMetaData();
+
+			// Add default devices
+			outputXML.println("<device>keyboard</device>");
+			outputXML.println("<device>mouse</device>");
+
+			// For each branch / alternative version
+			while (branches.next()) { 
+
+				// Write to the file. Either as Official version or the name of the alternate
+				String designName;
+				final String branchID = branches.getString(1);
+				final JSONObject ja = new JSONObject(branches.getString(2));
+					
+				if (ja.has("branchName")) {
+					designName = ja.getString("branchName");
+				}
+				else {
+					designName = "Official version";
+				}
+
+				// Include the JSON data of the branch
+				outputXML.println("<design name=\"" + designName + "\">");
+				
+				// Discover the mockups of that version
+
+			}
+		}
+		catch (final Exception e) {
+			final String errMsg = e.getMessage();
+			System.err.println(errMsg); 
+			return;
+		}
+		
 
 		outputXML.println("</cogtoolimport>");
 		outputXML.close();
