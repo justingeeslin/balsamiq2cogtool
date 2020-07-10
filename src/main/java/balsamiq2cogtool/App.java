@@ -86,20 +86,16 @@ public class App
 			final ResultSet branches = stmt.executeQuery("SELECT * FROM Branches;");
 			final ResultSetMetaData rsmd = branches.getMetaData();
 
-			// Add default devices
-			outputXML.println("<device>keyboard</device>");
-			outputXML.println("<device>mouse</device>");
-
 			// For each branch / alternative version
 			while (branches.next()) { 
 
 				// Write to the file. Either as Official version or the name of the alternate
 				String designName;
-				final String branchID = branches.getString(1);
-				final JSONObject ja = new JSONObject(branches.getString(2));
+				String branchID = branches.getString(1);
+				JSONObject jsonObjectBranchName = new JSONObject(branches.getString(2));
 					
-				if (ja.has("branchName")) {
-					designName = ja.getString("branchName");
+				if (jsonObjectBranchName.has("branchName")) {
+					designName = jsonObjectBranchName.getString("branchName");
 				}
 				else {
 					designName = "Official version";
@@ -108,8 +104,39 @@ public class App
 				// Include the JSON data of the branch
 				outputXML.println("<design name=\"" + designName + "\">");
 				
-				// Discover the mockups of that version
+				// Add default devices, added for each design
+				outputXML.println("<device>keyboard</device>");
+				outputXML.println("<device>mouse</device>");
 
+				// Discover the mockups of that version
+				Statement stmtMockups = db.createStatement();
+				ResultSet resources = stmtMockups.executeQuery("SELECT * FROM Resources WHERE BRANCHID = '" + branchID + "';");
+				ResultSetMetaData rsmdMockups = resources.getMetaData();
+				Float frameOffset = new Float(16.0);
+				Float frameOffsetIncrement = new Float(200.0);
+				while (resources.next()){
+					
+					System.out.println("Found a resource on branch " + branchID);
+					System.out.println("Resource attributes: " + resources.getString(3));
+					JSONObject jsonAttributes = new JSONObject(resources.getString(3));
+					System.out.println(jsonAttributes.getString("kind"));
+					// If it is a mockup...
+					// if (jsonAttributes.getString("kind") == "mockup") {
+						System.out.println("Adding frame...");
+						// .. create a frame in this design
+						String frameName = jsonAttributes.getString("name");
+						outputXML.println("<frame name=\"" + frameName + "\">");
+						outputXML.println("<topLeftOrigin x=\"" + Float.toString(frameOffset) + "\" y=\"16.0\"/>");
+
+						outputXML.println("</frame>");
+					// }
+
+					//Before moving on to the next frame, change its coordinate so they don't stack when imported.
+					frameOffset += frameOffsetIncrement;
+				}
+
+
+				outputXML.println("</design>");
 			}
 		}
 		catch (final Exception e) {
