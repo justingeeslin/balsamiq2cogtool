@@ -128,6 +128,26 @@ public class App
 						outputXML.println("<frame name=\"" + frameName + "\">");
 						outputXML.println("<topLeftOrigin x=\"" + Float.toString(frameOffset) + "\" y=\"16.0\"/>");
 
+						// Within each frame, get the components
+						JSONObject jsonData = new JSONObject(resources.getString(4));
+
+						JSONArray mockupControls = jsonData.getJSONObject("mockup").getJSONObject("controls").getJSONArray("control");
+
+						for (int i = 0; i < mockupControls.length(); i++) {
+							JSONObject controls = mockupControls.getJSONObject(i);
+							System.out.println(controls.getString("typeID"));
+
+							String widgetName = getCogToolWidgetType(controls.getString("typeID"));
+
+							outputXML.println("<widget name=\"" + controls.getString("typeID") + " " + Integer.toString(i) + "\" type=\"" + widgetName + "\" shape=\"rectangle\" w-is-standard=\"true\">");
+
+							// Add extents, width/height & positioning to the widget
+							outputXML.println("<displayLabel><![CDATA[Submit Query]]></displayLabel>");
+        					outputXML.println("<extent x=\"" + controls.getString("x") + "\" y=\"" + controls.getString("y") + "\" width=\"179.0\" height=\"58.0\"/>");
+
+							outputXML.println("</widget>");
+						}
+
 						outputXML.println("</frame>");
 					// }
 
@@ -149,5 +169,15 @@ public class App
 		outputXML.println("</cogtoolimport>");
 		outputXML.close();
 
+	}
+
+	private static String getCogToolWidgetType(String balsamiqType) {
+		String cogToolType = "non-interactive";
+
+		if (balsamiqType.equals("Button")) {
+			cogToolType = "button";
+		}
+
+		return cogToolType;
 	}
 }
