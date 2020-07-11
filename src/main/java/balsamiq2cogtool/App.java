@@ -77,6 +77,31 @@ public class App
 
 		System.out.println("About to write a CogTool XML...");
 		/*Create and open new movie.xml file*/
+
+		// Build a dictionary of IDs and Mockup Names. CogTool uses Mockup/Frame names where Balsamiq uses IDs.
+		Hashtable<String, String> mockupNames = new Hashtable<String, String>();
+		
+		try {
+			Statement stmtMockups = db.createStatement();
+			ResultSet resources = stmtMockups.executeQuery("SELECT * FROM Resources;");
+			ResultSetMetaData rsmdMockups = resources.getMetaData();
+	
+			while (resources.next()){
+				JSONObject jsonAttributes = new JSONObject(resources.getString(3));
+				// System.out.println(jsonAttributes.getString("kind"));
+				// If it is a mockup...
+				if (jsonAttributes.getString("kind").equals("mockup")) {
+					mockupNames.put(resources.getString(1), jsonAttributes.getString("name"));
+					// System.out.println("Resource attributes: " + resources.getString(3));
+				}
+				
+				
+			}
+		}
+		catch (Exception e) {
+
+		}
+		System.out.println(mockupNames);
 		
 		// Counter for widget groups.
 		int groupCounter = 1;
@@ -113,17 +138,17 @@ public class App
 				outputXML.println("<device>mouse</device>");
 
 				// Discover the mockups of that version
-				Statement stmtMockups = db.createStatement();
-				ResultSet resources = stmtMockups.executeQuery("SELECT * FROM Resources WHERE BRANCHID = '" + branchID + "';");
-				ResultSetMetaData rsmdMockups = resources.getMetaData();
+				Statement stmtMockupsBranch = db.createStatement();
+				ResultSet resourcesBranch = stmtMockupsBranch.executeQuery("SELECT * FROM Resources WHERE BRANCHID = '" + branchID + "';");
+				// ResultSetMetaData rsmdMockups = resourcesBranch.getMetaData();
 				Float frameOffset = new Float(16.0);
 				Float frameOffsetIncrement = new Float(200.0);
 
-				while (resources.next()){
+				while (resourcesBranch.next()){
 					
 					System.out.println("Found a resource on branch " + branchID);
-					System.out.println("Resource attributes: " + resources.getString(3));
-					JSONObject jsonAttributes = new JSONObject(resources.getString(3));
+					System.out.println("Resource attributes: " + resourcesBranch.getString(3));
+					JSONObject jsonAttributes = new JSONObject(resourcesBranch.getString(3));
 					System.out.println(jsonAttributes.getString("kind"));
 					// If it is a mockup...
 					// if (jsonAttributes.getString("kind") == "mockup") {
@@ -134,7 +159,7 @@ public class App
 						outputXML.println("<topLeftOrigin x=\"" + Float.toString(frameOffset) + "\" y=\"16.0\"/>");
 
 						// Within each frame, get the components
-						JSONObject jsonData = new JSONObject(resources.getString(4));
+						JSONObject jsonData = new JSONObject(resourcesBranch.getString(4));
 
 						JSONArray mockupControls = jsonData.getJSONObject("mockup").getJSONObject("controls").getJSONArray("control");
 
@@ -158,6 +183,7 @@ public class App
 
 							// Get properties like text and links, etc.
 							String widgetText = "Widget";
+							String widgetLinkToMockup = null;
 							if (controls.has("properties")) {
 								JSONObject controlProperties = controls.getJSONObject("properties");
 								System.out.println("Properties " + controlProperties);
@@ -167,7 +193,7 @@ public class App
 								}
 
 								if (controlProperties.has("href")) {
-									String linkedToMockup = controlProperties.getJSONObject("href").getString("ID");
+									widgetLinkToMockup = mockupNames.get(controlProperties.getJSONObject("href").getString("ID"));
 								}
 								
 							}
@@ -198,6 +224,12 @@ public class App
 							}
 
         					outputXML.println("<extent x=\"" + controls.getString("x") + "\" y=\"" + controls.getString("y") + "\" width=\"" + widgetWidth + "\" height=\"" + widgetHeight + "\"/>");
+
+							// If there is a link defined add a frame to frame transition
+							if (widgetLinkToMockup != null) {
+								outputXML.println("<transition destinationFrameName=\"" + widgetLinkToMockup + "\" durationInSecs=\"0.0\"><action><mouseAction action=\"downUp\" button=\"left\"></mouseAction></action></transition>");
+							}
+							
 
 							outputXML.println("</widget>");
 						}
