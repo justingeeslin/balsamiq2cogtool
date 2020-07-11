@@ -141,6 +141,8 @@ public class App
 						for (int i = 0; i < mockupControls.length(); i++) {
 							JSONObject controls = mockupControls.getJSONObject(i);
 							System.out.println(controls.getString("typeID"));
+							System.out.println("Controls " + controls);
+							
 
 							String widgetName = getCogToolWidgetType(controls.getString("typeID"));
 
@@ -154,8 +156,28 @@ public class App
 
 							outputXML.println("<widget name=\"" + controls.getString("typeID") + " " + Integer.toString(i) + "\" type=\"" + widgetName + "\" " + extraProperties + " shape=\"rectangle\" w-is-standard=\"true\">");
 
+							// Get properties like text and links, etc.
+							String widgetText = "Widget";
+							if (controls.has("properties")) {
+								JSONObject controlProperties = controls.getJSONObject("properties");
+								System.out.println("Properties " + controlProperties);
+
+								if (controlProperties.has("text")) {
+									widgetText = controlProperties.getString("text");
+								}
+
+								if (controlProperties.has("href")) {
+									String linkedToMockup = controlProperties.getJSONObject("href").getString("ID");
+								}
+								
+							}
 							
-							outputXML.println("<displayLabel><![CDATA[Submit Query]]></displayLabel>");
+							
+							// Get the text
+							// String widgetText = controlProperties.getString("text");
+							
+							
+							outputXML.println("<displayLabel><![CDATA[" + widgetText + "]]></displayLabel>");
 							// Add extents, width/height & positioning to the widget
 
 							// Get the Width and Height either in w or in measuredW
