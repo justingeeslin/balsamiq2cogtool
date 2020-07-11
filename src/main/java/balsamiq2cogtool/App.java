@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import org.sqlite.JDBC;
 import org.json.*;
@@ -154,7 +155,6 @@ public class App
 								widgetWidth = controls.getString("measuredW");
 							}
 
-
 							String widgetHeight = "60";
 							if (controls.has("h")) {
 								widgetHeight = controls.getString("h");
@@ -192,12 +192,22 @@ public class App
 	}
 
 	private static String getCogToolWidgetType(String balsamiqType) {
-		String cogToolType = "non-interactive";
+		Hashtable<String, String> balsamiq2CogToolWidgetType = new Hashtable<String, String>();
 
-		if (balsamiqType.equals("Button")) {
-			cogToolType = "button";
+		// Balsamiq type, CogTool widget type
+		balsamiq2CogToolWidgetType.put("Button", "button");
+		balsamiq2CogToolWidgetType.put("Link", "link");
+		// balsamiq2CogToolWidgetType.put("CheckBox", "check box");
+		// balsamiq2CogToolWidgetType.put("RadioButton", "radio button");
+		balsamiq2CogToolWidgetType.put("TextInput", "text box");
+
+		if (balsamiq2CogToolWidgetType.containsKey(balsamiqType)){
+			return balsamiq2CogToolWidgetType.get(balsamiqType);
+		}
+		else {
+			// A resonable default for the balsamiq types we don't anticpate.
+			return "non-interactive";
 		}
 
-		return cogToolType;
 	}
 }
