@@ -78,6 +78,9 @@ public class App
 		System.out.println("About to write a CogTool XML...");
 		/*Create and open new movie.xml file*/
 		
+		// Counter for widget groups.
+		int groupCounter = 1;
+
 		outputXML.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		outputXML.println("<cogtoolimport version=\"1\">");
 
@@ -115,6 +118,7 @@ public class App
 				ResultSetMetaData rsmdMockups = resources.getMetaData();
 				Float frameOffset = new Float(16.0);
 				Float frameOffsetIncrement = new Float(200.0);
+
 				while (resources.next()){
 					
 					System.out.println("Found a resource on branch " + branchID);
@@ -140,7 +144,15 @@ public class App
 
 							String widgetName = getCogToolWidgetType(controls.getString("typeID"));
 
-							outputXML.println("<widget name=\"" + controls.getString("typeID") + " " + Integer.toString(i) + "\" type=\"" + widgetName + "\" shape=\"rectangle\" w-is-standard=\"true\">");
+							// Some widgets require extra properties. Likely, because these are often grouped.
+							String extraProperties = "";
+							
+							if (widgetName.equals("check box") || widgetName.equals("radio button")) {
+								extraProperties = "x=\"0.0\" y=\"0.0\" group=\"Group [i" + Integer.toString(groupCounter) + "]\"";
+								groupCounter++;
+							}
+
+							outputXML.println("<widget name=\"" + controls.getString("typeID") + " " + Integer.toString(i) + "\" type=\"" + widgetName + "\" " + extraProperties + " shape=\"rectangle\" w-is-standard=\"true\">");
 
 							
 							outputXML.println("<displayLabel><![CDATA[Submit Query]]></displayLabel>");
@@ -197,8 +209,8 @@ public class App
 		// Balsamiq type, CogTool widget type
 		balsamiq2CogToolWidgetType.put("Button", "button");
 		balsamiq2CogToolWidgetType.put("Link", "link");
-		// balsamiq2CogToolWidgetType.put("CheckBox", "check box");
-		// balsamiq2CogToolWidgetType.put("RadioButton", "radio button");
+		balsamiq2CogToolWidgetType.put("CheckBox", "check box");
+		balsamiq2CogToolWidgetType.put("RadioButton", "radio button");
 		balsamiq2CogToolWidgetType.put("TextInput", "text box");
 
 		if (balsamiq2CogToolWidgetType.containsKey(balsamiqType)){
