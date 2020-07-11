@@ -141,9 +141,29 @@ public class App
 
 							outputXML.println("<widget name=\"" + controls.getString("typeID") + " " + Integer.toString(i) + "\" type=\"" + widgetName + "\" shape=\"rectangle\" w-is-standard=\"true\">");
 
-							// Add extents, width/height & positioning to the widget
+							
 							outputXML.println("<displayLabel><![CDATA[Submit Query]]></displayLabel>");
-        					outputXML.println("<extent x=\"" + controls.getString("x") + "\" y=\"" + controls.getString("y") + "\" width=\"179.0\" height=\"58.0\"/>");
+							// Add extents, width/height & positioning to the widget
+
+							// Get the Width and Height either in w or in measuredW
+							String widgetWidth = "180";
+							if (controls.has("w")) {
+								widgetWidth = controls.getString("w");
+							}
+							if (controls.has("measuredW")) {
+								widgetWidth = controls.getString("measuredW");
+							}
+
+
+							String widgetHeight = "60";
+							if (controls.has("h")) {
+								widgetHeight = controls.getString("h");
+							}
+							if (controls.has("measuredH")) {
+								widgetHeight = controls.getString("measuredH");
+							}
+
+        					outputXML.println("<extent x=\"" + controls.getString("x") + "\" y=\"" + controls.getString("y") + "\" width=\"" + widgetWidth + "\" height=\"" + widgetHeight + "\"/>");
 
 							outputXML.println("</widget>");
 						}
