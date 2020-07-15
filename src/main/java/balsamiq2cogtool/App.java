@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -84,7 +83,6 @@ public class App
 		try {
 			Statement stmtMockups = db.createStatement();
 			ResultSet resources = stmtMockups.executeQuery("SELECT * FROM Resources;");
-			ResultSetMetaData rsmdMockups = resources.getMetaData();
 	
 			while (resources.next()){
 				JSONObject jsonAttributes = new JSONObject(resources.getString(3));
@@ -113,7 +111,6 @@ public class App
 		try {
 			final Statement stmt = db.createStatement();
 			final ResultSet branches = stmt.executeQuery("SELECT * FROM Branches;");
-			final ResultSetMetaData rsmd = branches.getMetaData();
 
 			// For each branch / alternative version
 			while (branches.next()) { 
