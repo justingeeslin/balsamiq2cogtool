@@ -30,8 +30,7 @@ public class App {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		
+	
 	}
 
 	private static void copyFileUsingStream(File source, File dest) throws IOException {
