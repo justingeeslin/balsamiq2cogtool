@@ -29,6 +29,9 @@ public class BalsamiqToCogTool {
 	private static PrintStream outputXML;
 	private static File tempCogToolXMLFile;
 
+	// Counter for widget groups.
+	private static int groupCounter = 1;
+
 	/* Provide a BMPR file on the file system and have a populated CogTool XML file returned */
 	public File importBalsamiqProjectFile(File importBalsamiqFile) throws FileNotFoundException, SQLException {
 
@@ -177,8 +180,7 @@ public class BalsamiqToCogTool {
 		// Use for math calculations, positioning of frames etc.
 		Float frameOffset = new Float(16.0);
 		Float frameOffsetIncrement = new Float(200.0);
-		// Counter for widget groups.
-		int groupCounter = 1;
+		
 
 		while (resourcesBranch.next()) {
 
@@ -213,7 +215,10 @@ public class BalsamiqToCogTool {
 					String extraProperties = "";
 					
 					if (widgetName.equals("check box") || widgetName.equals("radio button")) {
-						extraProperties = "x=\"0.0\" y=\"0.0\" group=\"Group [i" + Integer.toString(groupCounter) + "]\"";
+						extraProperties = "x=\"0.0\" y=\"0.0\"";
+						// Removing groups in an attempt to dodge a CogTool bug (https://github.com/CogTool-Modern/cogtool/issues/44) Maybe a way to use these inteligentlly in the future.
+						extraProperties += " group=\"Group [i" + Integer.toString(groupCounter) + "]\"";
+
 						groupCounter++;
 					}
 
