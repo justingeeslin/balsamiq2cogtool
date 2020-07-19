@@ -46,6 +46,7 @@ public class BalsamiqToCogTool {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		JDBC dummyConnector = new JDBC();
         db = DriverManager.getConnection("jdbc:sqlite:" + importBalsamiqFile.getPath()); 
         System.out.println("Opened a sql file..");
 
